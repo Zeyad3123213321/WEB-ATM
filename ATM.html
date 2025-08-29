@@ -1,0 +1,2886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web ATM System</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .content {
+            padding: 30px;
+            min-height: 500px;
+        }
+        
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        input, select, button {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button.danger {
+            background-color: var(--accent-color);
+        }
+        
+        button.danger:hover {
+            background-color: #c0392b;
+        }
+        
+        button.success {
+            background-color: var(--success-color);
+        }
+        
+        button.success:hover {
+            background-color: #27ae60;
+        }
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .menu-btn {
+            padding: 15px;
+            text-align: center;
+            background-color: var(--light-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .menu-btn:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .transaction-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .transaction-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+        
+        .transaction-type {
+            font-weight: bold;
+        }
+        
+        .transaction-amount {
+            font-weight: bold;
+        }
+        
+        .deposit {
+            color: var(--success-color);
+        }
+        
+        .withdrawal {
+            color: var(--accent-color);
+        }
+        
+        .balance-display {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: var(--dark-color);
+        }
+        
+        .account-info {
+            background-color: var(--light-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .premium-badge {
+            background-color: var(--warning-color);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background-color: var(--success-color);
+        }
+        
+        .notification.error {
+            background-color: var(--accent-color);
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+        /* CSS Variables for Theming */
+        :root {
+            --primary: #2c3e50;
+            --primary-dark: #1a252f;
+            --primary-light: #34495e;
+            --secondary: #3498db;
+            --secondary-dark: #2980b9;
+            --accent: #e74c3c;
+            --accent-dark: #c0392b;
+            --success: #2ecc71;
+            --success-dark: #27ae60;
+            --warning: #f39c12;
+            --warning-dark: #e67e22;
+            --info: #1abc9c;
+            --info-dark: #16a085;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gray: #95a5a6;
+            --gray-light: #bdc3c7;
+            --gray-dark: #7f8c8d;
+            
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --shadow-xl: 0 20px 25px rgba(0,0,0,0.1);
+            
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-full: 9999px;
+            
+            --transition: all 0.3s ease;
+            --transition-slow: all 0.5s ease;
+            --transition-fast: all 0.15s ease;
+            
+            --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-md: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+            
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --spacing-3xl: 4rem;
+        }
+
+        /* Reset and Base Styles */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-family: var(--font-family);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: var(--spacing-md);
+            color: var(--dark);
+            font-size: var(--font-size-md);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: var(--spacing-md);
+        }
+
+        h1 {
+            font-size: var(--font-size-4xl);
+        }
+
+        h2 {
+            font-size: var(--font-size-3xl);
+        }
+
+        h3 {
+            font-size: var(--font-size-2xl);
+        }
+
+        h4 {
+            font-size: var(--font-size-xl);
+        }
+
+        p {
+            margin-bottom: var(--spacing-md);
+        }
+
+        a {
+            color: var(--secondary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        a:hover {
+            color: var(--secondary-dark);
+        }
+
+        ul, ol {
+            margin-bottom: var(--spacing-md);
+            padding-left: var(--spacing-lg);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Container and Layout */
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            position: relative;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: var(--spacing-xl);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            transform: rotate(30deg);
+        }
+
+        .logo {
+            font-size: var(--font-size-3xl);
+            font-weight: 800;
+            margin-bottom: var(--spacing-sm);
+            position: relative;
+            display: inline-block;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--secondary);
+            border-radius: var(--radius-full);
+        }
+
+        .subtitle {
+            font-size: var(--font-size-sm);
+            opacity: 0.8;
+            font-weight: 300;
+        }
+
+        .content {
+            padding: var(--spacing-xl);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            max-height: 500px;
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 600;
+            color: var(--primary);
+            font-size: var(--font-size-sm);
+        }
+
+        .form-group .input-icon {
+            position: absolute;
+            left: var(--spacing-md);
+            top: 38px;
+            color: var(--gray);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) var(--spacing-2xl);
+            border: 2px solid var(--gray-light);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-md);
+            transition: var(--transition);
+            background-color: var(--light);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            background-color: white;
+        }
+
+        .form-group input.error,
+        .form-group select.error,
+        .form-group textarea.error {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+        }
+
+        .form-hint {
+            font-size: var(--font-size-xs);
+            color: var(--gray-dark);
+            margin-top: var(--spacing-xs);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-md) var(--spacing-lg);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            gap: var(--spacing-sm);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--secondary-dark) 0%, var(--secondary) 100%);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--success-dark) 0%, var(--success) 100%);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-warning:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--warning-dark) 0%, var(--warning) 100%);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--secondary);
+            color: var(--secondary);
+        }
+
+        .btn-outline:hover:not(:disabled) {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: var(--font-size-sm);
+        }
+
+        .btn-lg {
+            padding: var(--spacing-lg) var(--spacing-xl);
+            font-size: var(--font-size-lg);
+        }
+
+        /* Menu Grid */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .menu-item {
+            background: linear-gradient(135deg, var(--light) 0%, #f8f9fa 100%);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--gray-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 120px;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--secondary);
+            background: linear-gradient(135deg, white 0%, #f8f9fa 100%);
+        }
+
+        .menu-item i {
+            font-size: var(--font-size-2xl);
+            margin-bottom: var(--spacing-sm);
+            color: var(--secondary);
+        }
+
+        .menu-item h3 {
+            font-size: var(--font-size-md);
+            margin-bottom: 0;
+            color: var(--primary);
+        }
+
+        .menu-item p {
+            font-size: var(--font-size-sm);
+            color: var(--gray-dark);
+            margin-bottom: 0;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            border: 1px solid var(--gray-light);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            padding-bottom: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: var(--font-size-lg);
+            margin-bottom: 0;
+            color: var(--primary);
+        }
+
+        .card-body {
+            padding: var(--spacing-md) 0;
+        }
+
+        /* Transaction List */
+        .transaction-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--gray-light);
+        }
+
+        .transaction-item {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-item:hover {
+            background-color: var(--light);
+        }
+
+        .transaction-type {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .transaction-amount {
+            font-weight: 700;
+        }
+
+        .transaction-details {
+            font-size: var(--font-size-sm);
+            color: var(--gray-dark);
+        }
+
+        .deposit {
+            color: var(--success);
+        }
+
+        .withdrawal {
+            color: var(--accent);
+        }
+
+        /* Balance Display */
+        .balance-display {
+            text-align: center;
+            font-size: var(--font-size-3xl);
+            font-weight: 800;
+            margin: var(--spacing-xl) 0;
+            color: var(--primary);
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .balance-display::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary), var(--info));
+            border-radius: var(--radius-full);
+        }
+
+        /* Account Info */
+        .account-info {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-lg);
+            border: 1px solid var(--gray-light);
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .info-value {
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        /* Premium Badge */
+        .premium-badge {
+            background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%);
+            color: white;
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: var(--spacing-xl);
+            right: var(--spacing-xl);
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-radius: var(--radius-md);
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            box-shadow: var(--shadow-lg);
+            max-width: 350px;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%);
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+        }
+
+        .notification-icon {
+            font-size: var(--font-size-xl);
+        }
+
+        /* Back Button */
+        .back-btn {
+            position: absolute;
+            top: var(--spacing-md);
+            left: var(--spacing-md);
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-full);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: white;
+            transition: var(--transition);
+            z-index: 10;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-3px);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            :root {
+                --font-size-4xl: 1.875rem;
+                --font-size-3xl: 1.625rem;
+                --font-size-2xl: 1.375rem;
+                --font-size-xl: 1.125rem;
+                --spacing-xl: 1.5rem;
+                --spacing-2xl: 2rem;
+            }
+
+            .container {
+                min-height: 100vh;
+                border-radius: 0;
+            }
+
+            .content {
+                padding: var(--spacing-md);
+                max-height: none;
+            }
+
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                padding: var(--spacing-lg);
+            }
+
+            .balance-display {
+                font-size: var(--font-size-2xl);
+            }
+        }
+
+        /* Dark Mode Support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --light: #2c3e50;
+                --dark: #ecf0f1;
+                --gray-light: #34495e;
+                --gray-dark: #bdc3c7;
+            }
+
+            .container {
+                background: var(--primary-dark);
+                color: var(--light);
+            }
+
+            .card {
+                background: var(--primary);
+                border-color: var(--primary-light);
+                color: white;
+            }
+
+            .account-info {
+                background: var(--primary);
+                border-color: var(--primary-light);
+            }
+
+            .menu-item {
+                background: var(--primary);
+                border-color: var(--primary-light);
+                color: white;
+            }
+
+            .menu-item:hover {
+                background: var(--primary-light);
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                background-color: var(--primary-light);
+                border-color: var(--primary);
+                color: white;
+            }
+
+            .form-group input:focus,
+            .form-group select:focus,
+            .form-group textarea:focus {
+                background-color: var(--primary);
+            }
+
+            .transaction-list {
+                border-color: var(--primary-light);
+            }
+
+            .transaction-item {
+                border-color: var(--primary-light);
+            }
+
+            .transaction-item:hover {
+                background-color: var(--primary);
+            }
+
+            .info-label {
+                color: var(--gray-light);
+            }
+
+            .info-value {
+                color: white;
+            }
+        }
+
+        /* Additional Utility Classes */
+        .text-center {
+            text-align: center;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .mt-1 { margin-top: var(--spacing-xs); }
+        .mt-2 { margin-top: var(--spacing-sm); }
+        .mt-3 { margin-top: var(--spacing-md); }
+        .mt-4 { margin-top: var(--spacing-lg); }
+        .mt-5 { margin-top: var(--spacing-xl); }
+
+        .mb-1 { margin-bottom: var(--spacing-xs); }
+        .mb-2 { margin-bottom: var(--spacing-sm); }
+        .mb-3 { margin-bottom: var(--spacing-md); }
+        .mb-4 { margin-bottom: var(--spacing-lg); }
+        .mb-5 { margin-bottom: var(--spacing-xl); }
+
+        .ml-1 { margin-left: var(--spacing-xs); }
+        .ml-2 { margin-left: var(--spacing-sm); }
+        .ml-3 { margin-left: var(--spacing-md); }
+        .ml-4 { margin-left: var(--spacing-lg); }
+        .ml-5 { margin-left: var(--spacing-xl); }
+
+        .mr-1 { margin-right: var(--spacing-xs); }
+        .mr-2 { margin-right: var(--spacing-sm); }
+        .mr-3 { margin-right: var(--spacing-md); }
+        .mr-4 { margin-right: var(--spacing-lg); }
+        .mr-5 { margin-right: var(--spacing-xl); }
+
+        .px-1 { padding-left: var(--spacing-xs); padding-right: var(--spacing-xs); }
+        .px-2 { padding-left: var(--spacing-sm); padding-right: var(--spacing-sm); }
+        .px-3 { padding-left: var(--spacing-md); padding-right: var(--spacing-md); }
+        .px-4 { padding-left: var(--spacing-lg); padding-right: var(--spacing-lg); }
+        .px-5 { padding-left: var(--spacing-xl); padding-right: var(--spacing-xl); }
+
+        .d-none { display: none; }
+        .d-block { display: block; }
+        .d-flex { display: flex; }
+        .d-inline-flex { display: inline-flex; }
+
+        .justify-content-start { justify-content: flex-start; }
+        .justify-content-center { justify-content: center; }
+        .justify-content-end { justify-content: flex-end; }
+        .justify-content-between { justify-content: space-between; }
+
+        .align-items-start { align-items: flex-start; }
+        .align-items-center { align-items: center; }
+        .align-items-end { align-items: flex-end; }
+
+        .flex-column { flex-direction: column; }
+        .flex-row { flex-direction: row; }
+
+        .w-100 { width: 100%; }
+        .w-75 { width: 75%; }
+        .w-50 { width: 50%; }
+        .w-25 { width: 25%; }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .slide-in-left {
+            animation: slideInLeft 0.5s ease;
+        }
+
+        .slide-in-right {
+            animation: slideInRight 0.5s ease;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Special Elements */
+        .security-shield {
+            position: absolute;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: var(--font-size-xl);
+            z-index: 1;
+        }
+
+        .balance-change {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            display: inline-block;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-full);
+            margin-left: var(--spacing-sm);
+        }
+
+        .balance-change.positive {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success-dark);
+        }
+
+        .balance-change.negative {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--accent-dark);
+        }
+
+        .feature-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            color: white;
+            font-size: var(--font-size-xs);
+            padding: 4px 8px;
+            border-radius: var(--radius-full);
+            font-weight: 700;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--gray-light);
+            border-radius: var(--radius-full);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary);
+            border-radius: var(--radius-full);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-dark);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="back-btn" id="backButton" style="display: none;">←</div>
+            <div class="logo">WEB ATM</div>
+            <div class="subtitle">Secure Banking Solution</div>
+        </div>
+        
+        <div class="content">
+            <!-- Main Menu Screen -->
+            <div class="screen active" id="mainMenuScreen">
+                <h2>Welcome to Web ATM</h2>
+                <p>Please select an option to continue</p>
+                
+                <div class="form-group">
+                    <button onclick="showScreen('loginScreen')">User Login</button>
+                    <button onclick="showScreen('registerScreen')">Register</button>
+                    <button onclick="showScreen('adminLoginScreen')">Admin Login</button>
+                    <button onclick="showScreen('forgotPasswordScreen')">Forgot Password</button>
+                </div>
+            </div>
+            
+            <!-- Login Screen -->
+            <div class="screen" id="loginScreen">
+                <h2>User Login</h2>
+                
+                <div class="form-group">
+                    <label for="loginUsername">Username</label>
+                    <input type="text" id="loginUsername" placeholder="Enter your username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPin">PIN</label>
+                    <input type="password" id="loginPin" placeholder="Enter your 4-digit PIN">
+                </div>
+                
+                <button onclick="login()">Login</button>
+                <button class="danger" onclick="showScreen('mainMenuScreen')">Cancel</button>
+            </div>
+            
+            <!-- Register Screen -->
+            <div class="screen" id="registerScreen">
+                <h2>Register New Account</h2>
+                
+                <div class="form-group">
+                    <label for="regUsername">Username</label>
+                    <input type="text" id="regUsername" placeholder="Choose a username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="regFirstName">First Name</label>
+                    <input type="text" id="regFirstName" placeholder="Enter your first name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="regLastName">Last Name</label>
+                    <input type="text" id="regLastName" placeholder="Enter your last name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="regPhone">Phone Number</label>
+                    <input type="text" id="regPhone" placeholder="Enter your phone number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="regEmail">Email Address</label>
+                    <input type="email" id="regEmail" placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="regPin">PIN</label>
+                    <input type="password" id="regPin" placeholder="Choose a 4-digit PIN">
+                </div>
+                
+                <div class="form-group">
+                    <label for="regConfirmPin">Confirm PIN</label>
+                    <input type="password" id="regConfirmPin" placeholder="Confirm your PIN">
+                </div>
+                
+                <button class="success" onclick="register()">Create Account</button>
+                <button class="danger" onclick="showScreen('mainMenuScreen')">Cancel</button>
+            </div>
+            
+            <!-- Admin Login Screen -->
+            <div class="screen" id="adminLoginScreen">
+                <h2>Administrator Login</h2>
+                
+                <div class="form-group">
+                    <label for="adminPassword">Admin Password</label>
+                    <input type="password" id="adminPassword" placeholder="Enter admin password">
+                </div>
+                
+                <button onclick="adminLogin()">Login</button>
+                <button class="danger" onclick="showScreen('mainMenuScreen')">Cancel</button>
+            </div>
+            
+            <!-- Forgot Password Screen -->
+            <div class="screen" id="forgotPasswordScreen">
+                <h2>Password Recovery</h2>
+                
+                <div class="form-group">
+                    <label for="recoveryUsername">Username</label>
+                    <input type="text" id="recoveryUsername" placeholder="Enter your username">
+                </div>
+                
+                <div id="securityQuestionContainer" style="display: none;">
+                    <div class="form-group">
+                        <label id="securityQuestionLabel">Security Question</label>
+                        <input type="text" id="securityAnswer" placeholder="Your answer">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPin">New PIN</label>
+                        <input type="password" id="newPin" placeholder="Enter new 4-digit PIN">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmNewPin">Confirm New PIN</label>
+                        <input type="password" id="confirmNewPin" placeholder="Confirm new PIN">
+                    </div>
+                </div>
+                
+                <button onclick="startRecovery()" id="recoveryButton">Start Recovery</button>
+                <button onclick="resetPassword()" id="resetButton" style="display: none;">Reset Password</button>
+                <button class="danger" onclick="showScreen('mainMenuScreen')">Cancel</button>
+            </div>
+            
+            <!-- User Dashboard Screen -->
+            <div class="screen" id="userDashboardScreen">
+                <h2>User Dashboard</h2>
+                
+                <div class="account-info">
+                    <div class="info-item">
+                        <span>Welcome,</span>
+                        <span id="userWelcome">Username</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Account Number:</span>
+                        <span id="userAccountNumber">N/A</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Balance:</span>
+                        <span id="userBalance">$0.00</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Status:</span>
+                        <span id="userStatus">Standard User</span>
+                    </div>
+                </div>
+                
+                <div class="menu-grid">
+                    <div class="menu-btn" onclick="showScreen('balanceScreen')">Check Balance</div>
+                    <div class="menu-btn" onclick="showScreen('depositScreen')">Deposit Money</div>
+                    <div class="menu-btn" onclick="showScreen('withdrawScreen')">Withdraw Money</div>
+                    <div class="menu-btn" onclick="showScreen('transferScreen')">Transfer Money</div>
+                    <div class="menu-btn" onclick="showScreen('transactionsScreen')">View Transactions</div>
+                    <div class="menu-btn" onclick="showScreen('changePinScreen')">Change PIN</div>
+                    <div class="menu-btn" onclick="showScreen('accountDetailsScreen')">Account Details</div>
+                    <div class="menu-btn" onclick="showScreen('loanScreen')">Apply for Loan</div>
+                    <div class="menu-btn" onclick="showScreen('repayLoanScreen')">Repay Loan</div>
+                    <div class="menu-btn" onclick="showScreen('premiumScreen')">Upgrade to Premium</div>
+                    <div class="menu-btn" onclick="showScreen('rewardsScreen')">Redeem Rewards</div>
+                    <div class="menu-btn" onclick="showScreen('securityQuestionsScreen')">Security Questions</div>
+                    <div class="menu-btn" onclick="logout()">Logout</div>
+                </div>
+            </div>
+            
+            <!-- Balance Screen -->
+            <div class="screen" id="balanceScreen">
+                <h2>Account Balance</h2>
+                
+                <div class="balance-display" id="currentBalance">$0.00</div>
+                
+                <div id="overdraftInfo" style="display: none;">
+                    <h3>Overdraft Protection</h3>
+                    <p>You are using overdraft protection. Limit: $<span id="overdraftLimit">0</span></p>
+                    <p>Used: $<span id="overdraftUsed">0</span></p>
+                </div>
+                
+                <button onclick="showScreen('userDashboardScreen')">Back to Dashboard</button>
+            </div>
+            
+            <!-- Deposit Screen -->
+            <div class="screen" id="depositScreen">
+                <h2>Deposit Money</h2>
+                
+                <div class="form-group">
+                    <label for="depositAmount">Amount to Deposit</label>
+                    <input type="number" id="depositAmount" placeholder="Enter amount" min="0" step="0.01">
+                </div>
+                
+                <button onclick="deposit()">Deposit</button>
+                <button class="danger" onclick="showScreen('userDashboardScreen')">Cancel</button>
+            </div>
+            
+            <!-- Withdraw Screen -->
+            <div class="screen" id="withdrawScreen">
+                <h2>Withdraw Money</h2>
+                
+                <div class="form-group">
+                    <label for="withdrawAmount">Amount to Withdraw</label>
+                    <input type="number" id="withdrawAmount" placeholder="Enter amount" min="0" step="0.01">
+                </div>
+                
+                <button onclick="withdraw()">Withdraw</button>
+                <button class="danger" onclick="showScreen('userDashboardScreen')">Cancel</button>
+            </div>
+            
+            <!-- Transfer Screen -->
+            <div class="screen" id="transferScreen">
+                <h2>Transfer Money</h2>
+                
+                <div class="form-group">
+                    <label for="transferRecipient">Recipient Username</label>
+                    <input type="text" id="transferRecipient" placeholder="Enter recipient's username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="transferAmount">Amount to Transfer</label>
+                    <input type="number" id="transferAmount" placeholder="Enter amount" min="0" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label for="transferDescription">Description (Optional)</label>
+                    <input type="text" id="transferDescription" placeholder="Enter description">
+                </div>
+                
+                <button onclick="transfer()">Transfer</button>
+                <button class="danger" onclick="showScreen('userDashboardScreen')">Cancel</button>
+            </div>
+            
+            <!-- Transactions Screen -->
+            <div class="screen" id="transactionsScreen">
+                <h2>Transaction History</h2>
+                
+                <div class="form-group">
+                    <label for="transactionLimit">Number of Transactions to Show</label>
+                    <input type="number" id="transactionLimit" value="10" min="1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="startDate">Start Date (Optional)</label>
+                    <input type="date" id="startDate">
+                </div>
+                
+                <div class="form-group">
+                    <label for="endDate">End Date (Optional)</label>
+                    <input type="date" id="endDate">
+                </div>
+                
+                <button onclick="loadTransactions()">Load Transactions</button>
+                
+                <div class="transaction-list" id="transactionList">
+                    <!-- Transactions will be displayed here -->
+                </div>
+                
+                <button onclick="showScreen('userDashboardScreen')">Back to Dashboard</button>
+            </div>
+            
+            <!-- Change PIN Screen -->
+            <div class="screen" id="changePinScreen">
+                <h2>Change PIN</h2>
+                
+                <div class="form-group">
+                    <label for="currentPin">Current PIN</label>
+                    <input type="password" id="currentPin" placeholder="Enter current PIN">
+                </div>
+                
+                <div class="form-group">
+                    <label for="newUserPin">New PIN</label>
+                    <input type="password" id="newUserPin" placeholder="Enter new 4-digit PIN">
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmNewUserPin">Confirm New PIN</label>
+                    <input type="password" id="confirmNewUserPin" placeholder="Confirm new PIN">
+                </div>
+                
+                <button onclick="changePin()">Change PIN</button>
+                <button class="danger" onclick="showScreen('userDashboardScreen')">Cancel</button>
+            </div>
+            
+            <!-- Account Details Screen -->
+            <div class="screen" id="accountDetailsScreen">
+                <h2>Account Details</h2>
+                
+                <div class="account-info">
+                    <div class="info-item">
+                        <span>Username:</span>
+                        <span id="detailUsername">N/A</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Account Number:</span>
+                        <span id="detailAccountNumber">N/A</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Full Name:</span>
+                        <span id="detailFullName">N/A</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Phone:</span>
+                        <span id="detailPhone">N/A</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Email:</span>
+                        <span id="detailEmail">N/A</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Balance:</span>
+                        <span id="detailBalance">$0.00</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Account Type:</span>
+                        <span id="detailType">Standard</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Account Created:</span>
+                        <span id="detailCreated">N/A</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Last Login:</span>
+                        <span id="detailLastLogin">N/A</span>
+                    </div>
+                </div>
+                
+                <button onclick="showScreen('userDashboardScreen')">Back to Dashboard</button>
+            </div>
+            
+            <!-- Loan Screen -->
+            <div class="screen" id="loanScreen">
+                <h2>Apply for Loan</h2>
+                
+                <div class="form-group">
+                    <label for="loanAmount">Loan Amount</label>
+                    <input type="number" id="loanAmount" placeholder="Enter amount" min="0" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label for="loanTerm">Loan Term (Months)</label>
+                    <input type="number" id="loanTerm" placeholder="Enter term in months" min="1">
+                </div>
+                
+                <div id="loanDetails" style="display: none; margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
+                    <h3>Loan Offer</h3>
+                    <p>Amount: $<span id="offerAmount">0</span></p>
+                    <p>Term: <span id="offerTerm">0</span> months</p>
+                    <p>Interest: $<span id="offerInterest">0</span></p>
+                    <p>Total Repayment: $<span id="offerTotal">0</span></p>
+                </div>
+                
+                <button onclick="calculateLoan()">Calculate Loan</button>
+                <button onclick="applyForLoan()" id="applyLoanButton" style="display: none;">Apply for Loan</button>
+                <button class="danger" onclick="showScreen('userDashboardScreen')">Cancel</button>
+            </div>
+            
+            <!-- Repay Loan Screen -->
+            <div class="screen" id="repayLoanScreen">
+                <h2>Repay Loan</h2>
+                
+                <div id="loanInfo">
+                    <p>Your current loan balance: $<span id="currentLoanBalance">0</span></p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="repaymentAmount">Repayment Amount</label>
+                    <input type="number" id="repaymentAmount" placeholder="Enter amount" min="0" step="0.01">
+                </div>
+                
+                <button onclick="repayLoan()">Repay</button>
+                <button class="danger" onclick="showScreen('userDashboardScreen')">Cancel</button>
+            </div>
+            
+            <!-- Premium Screen -->
+            <div class="screen" id="premiumScreen">
+                <h2>Upgrade to Premium</h2>
+                
+                <div id="premiumInfo">
+                    <p>Upgrade to Premium for just $100 and enjoy these benefits:</p>
+                    <ul style="margin: 15px 0 15px 20px;">
+                        <li>Higher overdraft limit ($5000)</li>
+                        <li>Lower loan interest rates</li>
+                        <li>Priority customer support</li>
+                    </ul>
+                    <p>Your current status: <span id="currentStatus">Standard</span></p>
+                </div>
+                
+                <button onclick="upgradeToPremium()" id="upgradeButton">Upgrade Now</button>
+                <button class="danger" onclick="showScreen('userDashboardScreen')">Cancel</button>
+            </div>
+            
+            <!-- Rewards Screen -->
+            <div class="screen" id="rewardsScreen">
+                <h2>Redeem Reward Points</h2>
+                
+                <div id="rewardsInfo">
+                    <p>Your current reward points: <span id="currentPoints">0</span></p>
+                    <p>Redemption options:</p>
+                </div>
+                
+                <div class="menu-grid">
+                    <div class="menu-btn" onclick="redeemRewards(100, 10)">
+                        100 points = $10
+                    </div>
+                    <div class="menu-btn" onclick="redeemRewards(500, 60)">
+                        500 points = $60
+                    </div>
+                    <div class="menu-btn" onclick="redeemRewards(1000, 130)">
+                        1000 points = $130
+                    </div>
+                </div>
+                
+                <button class="danger" onclick="showScreen('userDashboardScreen')">Back to Dashboard</button>
+            </div>
+            
+            <!-- Security Questions Screen -->
+            <div class="screen" id="securityQuestionsScreen">
+                <h2>Set Security Questions</h2>
+                
+                <div class="form-group">
+                    <label for="securityQuestion">Select a Security Question</label>
+                    <select id="securityQuestion">
+                        <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                        <option value="What city were you born in?">What city were you born in?</option>
+                        <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                        <option value="What was your first school name?">What was your first school name?</option>
+                        <option value="What is your favorite book?">What is your favorite book?</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="securityAnswerInput">Your Answer</label>
+                    <input type="text" id="securityAnswerInput" placeholder="Enter your answer">
+                </div>
+                
+                <button onclick="setSecurityQuestion()">Save Security Question</button>
+                <button class="danger" onclick="showScreen('userDashboardScreen')">Cancel</button>
+            </div>
+            
+            <!-- Admin Dashboard Screen -->
+            <div class="screen" id="adminDashboardScreen">
+                <h2>Admin Dashboard</h2>
+                
+                <div class="menu-grid">
+                    <div class="menu-btn" onclick="showScreen('adminViewUsersScreen')">View All Users</div>
+                    <div class="menu-btn" onclick="showScreen('adminUserDetailsScreen')">View User Details</div>
+                    <div class="menu-btn" onclick="showScreen('adminUnlockScreen')">Unlock User Account</div>
+                    <div class="menu-btn" onclick="showScreen('adminResetPasswordScreen')">Reset User Password</div>
+                    <div class="menu-btn" onclick="showScreen('adminDeleteUserScreen')">Delete User Account</div>
+                    <div class="menu-btn" onclick="showScreen('adminStatsScreen')">System Statistics</div>
+                    <div class="menu-btn" onclick="showScreen('adminInterestScreen')">Apply Interest</div>
+                    <div class="menu-btn" onclick="logout()">Logout</div>
+                </div>
+            </div>
+            
+            <!-- Admin View Users Screen -->
+            <div class="screen" id="adminViewUsersScreen">
+                <h2>All Users</h2>
+                
+                <div class="transaction-list" id="usersList">
+                    <!-- Users will be displayed here -->
+                </div>
+                
+                <button onclick="showScreen('adminDashboardScreen')">Back to Admin Dashboard</button>
+            </div>
+            
+            <!-- Admin User Details Screen -->
+            <div class="screen" id="adminUserDetailsScreen">
+                <h2>User Details</h2>
+                
+                <div class="form-group">
+                    <label for="adminUsername">Username</label>
+                    <input type="text" id="adminUsername" placeholder="Enter username">
+                </div>
+                
+                <button onclick="adminGetUserDetails()">Get Details</button>
+                
+                <div id="adminUserDetailsContainer" style="display: none;">
+                    <!-- User details will be displayed here -->
+                </div>
+                
+                <button onclick="showScreen('adminDashboardScreen')">Back to Admin Dashboard</button>
+            </div>
+            
+            <!-- Admin Unlock Screen -->
+            <div class="screen" id="adminUnlockScreen">
+                <h2>Unlock User Account</h2>
+                
+                <div class="form-group">
+                    <label for="unlockUsername">Username</label>
+                    <input type="text" id="unlockUsername" placeholder="Enter username">
+                </div>
+                
+                <button onclick="adminUnlockUser()">Unlock Account</button>
+                
+                <button onclick="showScreen('adminDashboardScreen')">Back to Admin Dashboard</button>
+            </div>
+            
+            <!-- Admin Reset Password Screen -->
+            <div class="screen" id="adminResetPasswordScreen">
+                <h2>Reset User Password</h2>
+                
+                <div class="form-group">
+                    <label for="resetUsername">Username</label>
+                    <input type="text" id="resetUsername" placeholder="Enter username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="adminNewPin">New PIN</label>
+                    <input type="password" id="adminNewPin" placeholder="Enter new 4-digit PIN">
+                </div>
+                
+                <div class="form-group">
+                    <label for="adminConfirmNewPin">Confirm New PIN</label>
+                    <input type="password" id="adminConfirmNewPin" placeholder="Confirm new PIN">
+                </div>
+                
+                <button onclick="adminResetPassword()">Reset Password</button>
+                
+                <button onclick="showScreen('adminDashboardScreen')">Back to Admin Dashboard</button>
+            </div>
+            
+            <!-- Admin Delete User Screen -->
+            <div class="screen" id="adminDeleteUserScreen">
+                <h2>Delete User Account</h2>
+                
+                <div class="form-group">
+                    <label for="deleteUsername">Username</label>
+                    <input type="text" id="deleteUsername" placeholder="Enter username">
+                </div>
+                
+                <button class="danger" onclick="adminDeleteUser()">Delete Account</button>
+                
+                <button onclick="showScreen('adminDashboardScreen')">Back to Admin Dashboard</button>
+            </div>
+            
+            <!-- Admin Stats Screen -->
+            <div class="screen" id="adminStatsScreen">
+                <h2>System Statistics</h2>
+                
+                <div id="adminStatsContainer">
+                    <!-- Stats will be displayed here -->
+                </div>
+                
+                <button onclick="loadAdminStats()">Load Statistics</button>
+                
+                <button onclick="showScreen('adminDashboardScreen')">Back to Admin Dashboard</button>
+            </div>
+            
+            <!-- Admin Interest Screen -->
+            <div class="screen" id="adminInterestScreen">
+                <h2>Apply Interest to All Accounts</h2>
+                
+                <p>This will apply monthly interest (2% annually) to all accounts with positive balances.</p>
+                <p>Last applied: <span id="lastInterestDate">Never</span></p>
+                
+                <button onclick="applyInterest()">Apply Interest</button>
+                
+                <button onclick="showScreen('adminDashboardScreen')">Back to Admin Dashboard</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Data storage and management
+        let users = JSON.parse(localStorage.getItem('atmUsers')) || {};
+        let currentUser = null;
+        let adminPassword = localStorage.getItem('atmAdminPassword') || "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"; // Default: admin123
+        let lastInterestDate = localStorage.getItem('atmLastInterestDate') || new Date().toISOString().split('T')[0];
+        
+        // Initialize with default admin if no users exist
+        if (Object.keys(users).length === 0) {
+            // Create a default user for demonstration
+            const defaultUser = {
+                username: "demo",
+                pin: "1234",
+                balance: 30000.0,
+                account_number: "ACC12345678",
+                first_name: "John",
+                last_name: "Doe",
+                phone: "123-456-7890",
+                email: "john.doe@example.com",
+                transaction_history: [],
+                locked: false,
+                login_attempts: 0,
+                last_login: null,
+                created_date: new Date().toISOString(),
+                loan_balance: 0.0,
+                overdraft_limit: 1000.0,
+                overdraft_used: 0.0,
+                is_premium: false,
+                reward_points: 0,
+                security_questions: {
+                    question: "What city were you born in?",
+                    answer: "new york"
+                }
+            };
+            
+            users[defaultUser.username] = defaultUser;
+            saveUsers();
+        }
+        
+        function saveUsers() {
+            localStorage.setItem('atmUsers', JSON.stringify(users));
+            localStorage.setItem('atmAdminPassword', adminPassword);
+            localStorage.setItem('atmLastInterestDate', lastInterestDate);
+        }
+        
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show the requested screen
+            document.getElementById(screenId).classList.add('active');
+            
+            // Show/hide back button
+            const backButton = document.getElementById('backButton');
+            if (screenId === 'mainMenuScreen' || screenId === 'userDashboardScreen' || screenId === 'adminDashboardScreen') {
+                backButton.style.display = 'none';
+            } else {
+                backButton.style.display = 'flex';
+                
+                // Set back button action based on current user
+                if (currentUser) {
+                    backButton.onclick = () => showScreen('userDashboardScreen');
+                } else if (screenId.startsWith('admin')) {
+                    backButton.onclick = () => showScreen('adminDashboardScreen');
+                } else {
+                    backButton.onclick = () => showScreen('mainMenuScreen');
+                }
+            }
+            
+            // Load data for specific screens
+            if (screenId === 'userDashboardScreen' && currentUser) {
+                loadDashboard();
+            } else if (screenId === 'balanceScreen') {
+                loadBalanceScreen();
+            } else if (screenId === 'accountDetailsScreen') {
+                loadAccountDetails();
+            } else if (screenId === 'loanScreen') {
+                document.getElementById('loanDetails').style.display = 'none';
+                document.getElementById('applyLoanButton').style.display = 'none';
+            } else if (screenId === 'repayLoanScreen') {
+                loadRepayLoanScreen();
+            } else if (screenId === 'premiumScreen') {
+                loadPremiumScreen();
+            } else if (screenId === 'rewardsScreen') {
+                loadRewardsScreen();
+            } else if (screenId === 'adminViewUsersScreen') {
+                loadAdminUsersList();
+            } else if (screenId === 'adminStatsScreen') {
+                loadAdminStats();
+            } else if (screenId === 'adminInterestScreen') {
+                document.getElementById('lastInterestDate').textContent = lastInterestDate;
+            }
+        }
+        
+        function loadDashboard() {
+            const user = users[currentUser];
+            document.getElementById('userWelcome').textContent = user.username;
+            document.getElementById('userAccountNumber').textContent = user.account_number;
+            document.getElementById('userBalance').textContent = `$${user.balance.toFixed(2)}`;
+            document.getElementById('userStatus').textContent = user.is_premium ? 'Premium User 🌟' : 'Standard User';
+        }
+        
+        function loadBalanceScreen() {
+            const user = users[currentUser];
+            document.getElementById('currentBalance').textContent = `$${user.balance.toFixed(2)}`;
+            
+            if (user.overdraft_used > 0) {
+                document.getElementById('overdraftInfo').style.display = 'block';
+                document.getElementById('overdraftLimit').textContent = user.overdraft_limit.toFixed(2);
+                document.getElementById('overdraftUsed').textContent = user.overdraft_used.toFixed(2);
+            } else {
+                document.getElementById('overdraftInfo').style.display = 'none';
+            }
+        }
+        
+        function loadAccountDetails() {
+            const user = users[currentUser];
+            document.getElementById('detailUsername').textContent = user.username;
+            document.getElementById('detailAccountNumber').textContent = user.account_number;
+            document.getElementById('detailFullName').textContent = `${user.first_name} ${user.last_name}`;
+            document.getElementById('detailPhone').textContent = user.phone;
+            document.getElementById('detailEmail').textContent = user.email;
+            document.getElementById('detailBalance').textContent = `$${user.balance.toFixed(2)}`;
+            document.getElementById('detailType').textContent = user.is_premium ? 'Premium' : 'Standard';
+            document.getElementById('detailCreated').textContent = new Date(user.created_date).toLocaleString();
+            document.getElementById('detailLastLogin').textContent = user.last_login ? new Date(user.last_login).toLocaleString() : 'Never';
+        }
+        
+        function loadRepayLoanScreen() {
+            const user = users[currentUser];
+            document.getElementById('currentLoanBalance').textContent = user.loan_balance.toFixed(2);
+        }
+        
+        function loadPremiumScreen() {
+            const user = users[currentUser];
+            document.getElementById('currentStatus').textContent = user.is_premium ? 'Premium' : 'Standard';
+            
+            if (user.is_premium) {
+                document.getElementById('upgradeButton').style.display = 'none';
+            } else {
+                document.getElementById('upgradeButton').style.display = 'block';
+            }
+        }
+        
+        function loadRewardsScreen() {
+            const user = users[currentUser];
+            document.getElementById('currentPoints').textContent = user.reward_points;
+        }
+        
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const pin = document.getElementById('loginPin').value;
+            
+            if (!username || !pin) {
+                showNotification('Please enter both username and PIN', 'error');
+                return;
+            }
+            
+            if (!users[username]) {
+                showNotification('User not found', 'error');
+                return;
+            }
+            
+            const user = users[username];
+            
+            if (user.locked) {
+                showNotification('Account is locked. Please contact administrator.', 'error');
+                return;
+            }
+            
+            if (user.pin !== pin) {
+                user.login_attempts++;
+                
+                if (user.login_attempts >= 3) {
+                    user.locked = true;
+                    showNotification('Too many failed attempts. Account locked.', 'error');
+                } else {
+                    showNotification(`Incorrect PIN. ${3 - user.login_attempts} attempts remaining.`, 'error');
+                }
+                
+                saveUsers();
+                return;
+            }
+            
+            // Successful login
+            user.login_attempts = 0;
+            user.last_login = new Date().toISOString();
+            currentUser = username;
+            saveUsers();
+            
+            showNotification('Login successful!');
+            showScreen('userDashboardScreen');
+        }
+        
+        function register() {
+            const username = document.getElementById('regUsername').value;
+            const firstName = document.getElementById('regFirstName').value;
+            const lastName = document.getElementById('regLastName').value;
+            const phone = document.getElementById('regPhone').value;
+            const email = document.getElementById('regEmail').value;
+            const pin = document.getElementById('regPin').value;
+            const confirmPin = document.getElementById('regConfirmPin').value;
+            
+            if (!username || !firstName || !lastName || !pin) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            if (pin !== confirmPin) {
+                showNotification('PINs do not match', 'error');
+                return;
+            }
+            
+            if (pin.length !== 4 || !/^\d+$/.test(pin)) {
+                showNotification('PIN must be exactly 4 digits', 'error');
+                return;
+            }
+            
+            if (users[username]) {
+                showNotification('Username already exists', 'error');
+                return;
+            }
+            
+            // Generate account number
+            const timestamp = new Date().getTime().toString();
+            const accountNumber = `ACC${timestamp.substring(timestamp.length - 10)}`;
+            
+            // Create new user
+            const newUser = {
+                username: username,
+                pin: pin,
+                balance: 30000.0,
+                account_number: accountNumber,
+                first_name: firstName,
+                last_name: lastName,
+                phone: phone,
+                email: email,
+                transaction_history: [],
+                locked: false,
+                login_attempts: 0,
+                last_login: null,
+                created_date: new Date().toISOString(),
+                loan_balance: 0.0,
+                overdraft_limit: 1000.0,
+                overdraft_used: 0.0,
+                is_premium: false,
+                reward_points: 0,
+                security_questions: {}
+            };
+            
+            users[username] = newUser;
+            saveUsers();
+            
+            showNotification('Registration successful! Please set up security questions.');
+            showScreen('securityQuestionsScreen');
+        }
+        
+        function adminLogin() {
+            const password = document.getElementById('adminPassword').value;
+            
+            // Hash the input password
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            crypto.subtle.digest('SHA-256', data).then(hash => {
+                const hashArray = Array.from(new Uint8Array(hash));
+                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                
+                if (hashHex === adminPassword) {
+                    showNotification('Admin login successful!');
+                    showScreen('adminDashboardScreen');
+                } else {
+                    showNotification('Invalid admin password', 'error');
+                }
+            });
+        }
+        
+        function startRecovery() {
+            const username = document.getElementById('recoveryUsername').value;
+            
+            if (!username) {
+                showNotification('Please enter a username', 'error');
+                return;
+            }
+            
+            if (!users[username]) {
+                showNotification('User not found', 'error');
+                return;
+            }
+            
+            const user = users[username];
+            
+            if (!user.security_questions || !user.security_questions.question) {
+                showNotification('No security questions set for this user', 'error');
+                return;
+            }
+            
+            document.getElementById('securityQuestionLabel').textContent = user.security_questions.question;
+            document.getElementById('securityQuestionContainer').style.display = 'block';
+            document.getElementById('recoveryButton').style.display = 'none';
+            document.getElementById('resetButton').style.display = 'block';
+        }
+        
+        function resetPassword() {
+            const username = document.getElementById('recoveryUsername').value;
+            const answer = document.getElementById('securityAnswer').value;
+            const newPin = document.getElementById('newPin').value;
+            const confirmNewPin = document.getElementById('confirmNewPin').value;
+            
+            if (!answer || !newPin || !confirmNewPin) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            if (newPin !== confirmNewPin) {
+                showNotification('PINs do not match', 'error');
+                return;
+            }
+            
+            if (newPin.length !== 4 || !/^\d+$/.test(newPin)) {
+                showNotification('PIN must be exactly 4 digits', 'error');
+                return;
+            }
+            
+            const user = users[username];
+            
+            if (user.security_questions.answer.toLowerCase() !== answer.toLowerCase()) {
+                showNotification('Incorrect security answer', 'error');
+                return;
+            }
+            
+            user.pin = newPin;
+            user.locked = false;
+            user.login_attempts = 0;
+            saveUsers();
+            
+            showNotification('Password reset successfully!');
+            showScreen('loginScreen');
+        }
+        
+        function logout() {
+            currentUser = null;
+            showScreen('mainMenuScreen');
+        }
+        
+        function deposit() {
+            const amount = parseFloat(document.getElementById('depositAmount').value);
+            
+            if (isNaN(amount) || amount <= 0) {
+                showNotification('Invalid deposit amount', 'error');
+                return;
+            }
+            
+            const user = users[currentUser];
+            user.balance += amount;
+            
+            // Add reward points (1 point per $100)
+            const points = Math.floor(amount / 100);
+            user.reward_points += points;
+            
+            // Record transaction
+            user.transaction_history.push({
+                type: "deposit",
+                amount: amount,
+                balance_after: user.balance,
+                timestamp: new Date().toISOString()
+            });
+            
+            saveUsers();
+            
+            if (points > 0) {
+                showNotification(`Deposit successful! Earned ${points} reward points.`);
+            } else {
+                showNotification('Deposit successful!');
+            }
+            
+            document.getElementById('depositAmount').value = '';
+            showScreen('userDashboardScreen');
+        }
+        
+        function withdraw() {
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            
+            if (isNaN(amount) || amount <= 0) {
+                showNotification('Invalid withdrawal amount', 'error');
+                return;
+            }
+            
+            const user = users[currentUser];
+            const availableBalance = user.balance + (user.overdraft_limit - user.overdraft_used);
+            
+            if (amount > availableBalance) {
+                showNotification('Insufficient funds', 'error');
+                return;
+            }
+            
+            // Check if we need to use overdraft
+            if (amount > user.balance) {
+                const overdraftNeeded = amount - user.balance;
+                user.overdraft_used += overdraftNeeded;
+                user.balance = 0;
+                
+                showNotification(`Withdrawal successful! Used $${overdraftNeeded.toFixed(2)} from your overdraft protection.`);
+            } else {
+                user.balance -= amount;
+                showNotification('Withdrawal successful!');
+            }
+            
+            // Record transaction
+            user.transaction_history.push({
+                type: "withdrawal",
+                amount: amount,
+                balance_after: user.balance,
+                timestamp: new Date().toISOString()
+            });
+            
+            saveUsers();
+            document.getElementById('withdrawAmount').value = '';
+            showScreen('userDashboardScreen');
+        }
+        
+        function transfer() {
+            const recipientUsername = document.getElementById('transferRecipient').value;
+            const amount = parseFloat(document.getElementById('transferAmount').value);
+            const description = document.getElementById('transferDescription').value;
+            
+            if (!recipientUsername) {
+                showNotification('Please enter recipient username', 'error');
+                return;
+            }
+            
+            if (isNaN(amount) || amount <= 0) {
+                showNotification('Invalid transfer amount', 'error');
+                return;
+            }
+            
+            if (recipientUsername === currentUser) {
+                showNotification('You cannot transfer money to yourself', 'error');
+                return;
+            }
+            
+            if (!users[recipientUsername]) {
+                showNotification('Recipient not found', 'error');
+                return;
+            }
+            
+            const sender = users[currentUser];
+            const recipient = users[recipientUsername];
+            const availableBalance = sender.balance + (sender.overdraft_limit - sender.overdraft_used);
+            
+            if (amount > availableBalance) {
+                showNotification('Insufficient funds', 'error');
+                return;
+            }
+            
+            // Check if we need to use overdraft
+            if (amount > sender.balance) {
+                const overdraftNeeded = amount - sender.balance;
+                sender.overdraft_used += overdraftNeeded;
+                sender.balance = 0;
+            } else {
+                sender.balance -= amount;
+            }
+            
+            recipient.balance += amount;
+            
+            const timestamp = new Date().toISOString();
+            
+            // Record transaction for sender
+            sender.transaction_history.push({
+                type: "transfer_out",
+                amount: amount,
+                balance_after: sender.balance,
+                recipient: recipientUsername,
+                description: description,
+                timestamp: timestamp
+            });
+            
+            // Record transaction for recipient
+            recipient.transaction_history.push({
+                type: "transfer_in",
+                amount: amount,
+                balance_after: recipient.balance,
+                sender: currentUser,
+                description: description,
+                timestamp: timestamp
+            });
+            
+            saveUsers();
+            
+            showNotification(`Transfer of $${amount.toFixed(2)} to ${recipientUsername} successful!`);
+            document.getElementById('transferRecipient').value = '';
+            document.getElementById('transferAmount').value = '';
+            document.getElementById('transferDescription').value = '';
+            showScreen('userDashboardScreen');
+        }
+        
+        function loadTransactions() {
+            const limit = parseInt(document.getElementById('transactionLimit').value) || 10;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            const user = users[currentUser];
+            let transactions = user.transaction_history;
+            
+            // Filter by date if provided
+            if (startDate) {
+                const start = new Date(startDate);
+                transactions = transactions.filter(t => new Date(t.timestamp) >= start);
+            }
+            
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setDate(end.getDate() + 1); // Include the entire end date
+                transactions = transactions.filter(t => new Date(t.timestamp) < end);
+            }
+            
+            // Apply limit
+            if (limit > 0) {
+                transactions = transactions.slice(-limit);
+            }
+            
+            const transactionList = document.getElementById('transactionList');
+            transactionList.innerHTML = '';
+            
+            if (transactions.length === 0) {
+                transactionList.innerHTML = '<div class="transaction-item">No transactions found</div>';
+                return;
+            }
+            
+            // Show most recent first
+            transactions.reverse().forEach(transaction => {
+                const item = document.createElement('div');
+                item.className = 'transaction-item';
+                
+                const typeClass = transaction.type.includes('deposit') || transaction.type.includes('in') ? 'deposit' : 'withdrawal';
+                
+                item.innerHTML = `
+                    <div>
+                        <div class="transaction-type">${transaction.type.toUpperCase()}</div>
+                        <div>${new Date(transaction.timestamp).toLocaleString()}</div>
+                        ${transaction.recipient ? `<div>To: ${transaction.recipient}</div>` : ''}
+                        ${transaction.sender ? `<div>From: ${transaction.sender}</div>` : ''}
+                        ${transaction.description ? `<div>Description: ${transaction.description}</div>` : ''}
+                    </div>
+                    <div class="transaction-amount ${typeClass}">$${transaction.amount.toFixed(2)}</div>
+                `;
+                
+                transactionList.appendChild(item);
+            });
+        }
+        
+        function changePin() {
+            const currentPin = document.getElementById('currentPin').value;
+            const newPin = document.getElementById('newUserPin').value;
+            const confirmNewPin = document.getElementById('confirmNewUserPin').value;
+            
+            if (!currentPin || !newPin || !confirmNewPin) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            if (newPin !== confirmNewPin) {
+                showNotification('PINs do not match', 'error');
+                return;
+            }
+            
+            if (newPin.length !== 4 || !/^\d+$/.test(newPin)) {
+                showNotification('PIN must be exactly 4 digits', 'error');
+                return;
+            }
+            
+            const user = users[currentUser];
+            
+            if (user.pin !== currentPin) {
+                showNotification('Incorrect current PIN', 'error');
+                return;
+            }
+            
+            user.pin = newPin;
+            saveUsers();
+            
+            showNotification('PIN changed successfully!');
+            document.getElementById('currentPin').value = '';
+            document.getElementById('newUserPin').value = '';
+            document.getElementById('confirmNewUserPin').value = '';
+            showScreen('userDashboardScreen');
+        }
+        
+        function calculateLoan() {
+            const amount = parseFloat(document.getElementById('loanAmount').value);
+            const term = parseInt(document.getElementById('loanTerm').value);
+            
+            if (isNaN(amount) || amount <= 0) {
+                showNotification('Invalid loan amount', 'error');
+                return;
+            }
+            
+            if (isNaN(term) || term <= 0) {
+                showNotification('Invalid loan term', 'error');
+                return;
+            }
+            
+            const user = users[currentUser];
+            
+            // Simple eligibility check
+            if (amount > user.balance * 2) {
+                showNotification('Loan amount exceeds eligibility limit', 'error');
+                return;
+            }
+            
+            if (user.loan_balance > 0) {
+                showNotification('You already have an outstanding loan', 'error');
+                return;
+            }
+            
+            // Calculate interest (5% per year)
+            const interest = amount * 0.05 * (term / 12);
+            const totalAmount = amount + interest;
+            
+            document.getElementById('offerAmount').textContent = amount.toFixed(2);
+            document.getElementById('offerTerm').textContent = term;
+            document.getElementById('offerInterest').textContent = interest.toFixed(2);
+            document.getElementById('offerTotal').textContent = totalAmount.toFixed(2);
+            
+            document.getElementById('loanDetails').style.display = 'block';
+            document.getElementById('applyLoanButton').style.display = 'block';
+        }
+        
+        function applyForLoan() {
+            const amount = parseFloat(document.getElementById('loanAmount').value);
+            const term = parseInt(document.getElementById('loanTerm').value);
+            
+            if (isNaN(amount) || amount <= 0 || isNaN(term) || term <= 0) {
+                showNotification('Invalid loan parameters', 'error');
+                return;
+            }
+            
+            const user = users[currentUser];
+            
+            // Calculate interest (5% per year)
+            const interest = amount * 0.05 * (term / 12);
+            const totalAmount = amount + interest;
+            
+            user.balance += amount;
+            user.loan_balance = totalAmount;
+            
+            // Record transaction
+            user.transaction_history.push({
+                type: "loan_disbursement",
+                amount: amount,
+                balance_after: user.balance,
+                term_months: term,
+                total_repayment: totalAmount,
+                timestamp: new Date().toISOString()
+            });
+            
+            saveUsers();
+            
+            showNotification(`Loan of $${amount.toFixed(2)} has been disbursed to your account.`);
+            document.getElementById('loanAmount').value = '';
+            document.getElementById('loanTerm').value = '';
+            document.getElementById('loanDetails').style.display = 'none';
+            document.getElementById('applyLoanButton').style.display = 'none';
+            showScreen('userDashboardScreen');
+        }
+        
+        function repayLoan() {
+            const amount = parseFloat(document.getElementById('repaymentAmount').value);
+            
+            if (isNaN(amount) || amount <= 0) {
+                showNotification('Invalid repayment amount', 'error');
+                return;
+            }
+            
+            const user = users[currentUser];
+            
+            if (user.loan_balance <= 0) {
+                showNotification("You don't have any outstanding loan", 'error');
+                return;
+            }
+            
+            if (amount > user.balance) {
+                showNotification('Insufficient funds for repayment', 'error');
+                return;
+            }
+            
+            const repaymentAmount = Math.min(amount, user.loan_balance);
+            user.balance -= repaymentAmount;
+            user.loan_balance -= repaymentAmount;
+            
+            // Record transaction
+            user.transaction_history.push({
+                type: "loan_repayment",
+                amount: repaymentAmount,
+                balance_after: user.balance,
+                remaining_loan: user.loan_balance,
+                timestamp: new Date().toISOString()
+            });
+            
+            saveUsers();
+            
+            if (user.loan_balance <= 0) {
+                showNotification(`Loan fully repaid! $${repaymentAmount.toFixed(2)} applied.`);
+            } else {
+                showNotification(`$${repaymentAmount.toFixed(2)} applied to your loan. Remaining balance: $${user.loan_balance.toFixed(2)}`);
+            }
+            
+            document.getElementById('repaymentAmount').value = '';
+            showScreen('userDashboardScreen');
+        }
+        
+        function upgradeToPremium() {
+            const user = users[currentUser];
+            
+            if (user.is_premium) {
+                showNotification('You are already a premium member', 'error');
+                return;
+            }
+            
+            const fee = 100.0;
+            
+            if (user.balance < fee) {
+                showNotification(`Insufficient funds. Premium membership requires $${fee.toFixed(2)}.`, 'error');
+                return;
+            }
+            
+            user.balance -= fee;
+            user.is_premium = true;
+            user.overdraft_limit = 5000.0;
+            
+            // Record transaction
+            user.transaction_history.push({
+                type: "premium_upgrade",
+                amount: fee,
+                balance_after: user.balance,
+                timestamp: new Date().toISOString()
+            });
+            
+            saveUsers();
+            
+            showNotification('Congratulations! You are now a premium member.');
+            showScreen('userDashboardScreen');
+        }
+        
+        function redeemRewards(pointsRequired, cashValue) {
+            const user = users[currentUser];
+            
+            if (user.reward_points < pointsRequired) {
+                showNotification(`Insufficient points. You need ${pointsRequired} points.`, 'error');
+                return;
+            }
+            
+            user.reward_points -= pointsRequired;
+            user.balance += cashValue;
+            
+            // Record transaction
+            user.transaction_history.push({
+                type: "reward_redemption",
+                points_used: pointsRequired,
+                cash_value: cashValue,
+                balance_after: user.balance,
+                remaining_points: user.reward_points,
+                timestamp: new Date().toISOString()
+            });
+            
+            saveUsers();
+            
+            showNotification(`Successfully redeemed ${pointsRequired} points for $${cashValue.toFixed(2)}.`);
+            loadRewardsScreen();
+        }
+        
+        function setSecurityQuestion() {
+            const question = document.getElementById('securityQuestion').value;
+            const answer = document.getElementById('securityAnswerInput').value;
+            
+            if (!question || !answer) {
+                showNotification('Please select a question and provide an answer', 'error');
+                return;
+            }
+            
+            const user = users[currentUser];
+            user.security_questions = {
+                question: question,
+                answer: answer.toLowerCase()
+            };
+            
+            saveUsers();
+            
+            showNotification('Security question set successfully!');
+            document.getElementById('securityAnswerInput').value = '';
+            showScreen('userDashboardScreen');
+        }
+        
+        function loadAdminUsersList() {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+            
+            if (Object.keys(users).length === 0) {
+                usersList.innerHTML = '<div class="transaction-item">No users registered</div>';
+                return;
+            }
+            
+            Object.values(users).forEach(user => {
+                const item = document.createElement('div');
+                item.className = 'transaction-item';
+                
+                item.innerHTML = `
+                    <div>
+                        <div><strong>${user.username}</strong> ${user.is_premium ? '<span class="premium-badge">Premium</span>' : ''}</div>
+                        <div>${user.account_number}</div>
+                        <div>${user.first_name} ${user.last_name}</div>
+                    </div>
+                    <div>
+                        <div>$${user.balance.toFixed(2)}</div>
+                        <div>${user.locked ? '<span style="color: red;">Locked</span>' : '<span style="color: green;">Active</span>'}</div>
+                    </div>
+                `;
+                
+                usersList.appendChild(item);
+            });
+        }
+        
+        function adminGetUserDetails() {
+            const username = document.getElementById('adminUsername').value;
+            
+            if (!username) {
+                showNotification('Please enter a username', 'error');
+                return;
+            }
+            
+            if (!users[username]) {
+                showNotification('User not found', 'error');
+                return;
+            }
+            
+            const user = users[username];
+            const container = document.getElementById('adminUserDetailsContainer');
+            
+            container.innerHTML = `
+                <div class="account-info">
+                    <div class="info-item">
+                        <span>Username:</span>
+                        <span>${user.username}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Account Number:</span>
+                        <span>${user.account_number}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Full Name:</span>
+                        <span>${user.first_name} ${user.last_name}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Phone:</span>
+                        <span>${user.phone}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Email:</span>
+                        <span>${user.email}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Balance:</span>
+                        <span>$${user.balance.toFixed(2)}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Loan Balance:</span>
+                        <span>$${user.loan_balance.toFixed(2)}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Overdraft Used:</span>
+                        <span>$${user.overdraft_used.toFixed(2)} / $${user.overdraft_limit.toFixed(2)}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Reward Points:</span>
+                        <span>${user.reward_points}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Account Type:</span>
+                        <span>${user.is_premium ? 'Premium' : 'Standard'}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Status:</span>
+                        <span>${user.locked ? 'Locked' : 'Active'}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Login Attempts:</span>
+                        <span>${user.login_attempts}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Account Created:</span>
+                        <span>${new Date(user.created_date).toLocaleString()}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Last Login:</span>
+                        <span>${user.last_login ? new Date(user.last_login).toLocaleString() : 'Never'}</span>
+                    </div>
+                </div>
+            `;
+            
+            container.style.display = 'block';
+        }
+        
+        function adminUnlockUser() {
+            const username = document.getElementById('unlockUsername').value;
+            
+            if (!username) {
+                showNotification('Please enter a username', 'error');
+                return;
+            }
+            
+            if (!users[username]) {
+                showNotification('User not found', 'error');
+                return;
+            }
+            
+            const user = users[username];
+            
+            if (!user.locked) {
+                showNotification('Account is not locked', 'error');
+                return;
+            }
+            
+            user.locked = false;
+            user.login_attempts = 0;
+            saveUsers();
+            
+            showNotification(`Account ${username} has been unlocked.`);
+            document.getElementById('unlockUsername').value = '';
+        }
+        
+        function adminResetPassword() {
+            const username = document.getElementById('resetUsername').value;
+            const newPin = document.getElementById('adminNewPin').value;
+            const confirmNewPin = document.getElementById('adminConfirmNewPin').value;
+            
+            if (!username) {
+                showNotification('Please enter a username', 'error');
+                return;
+            }
+            
+            if (!users[username]) {
+                showNotification('User not found', 'error');
+                return;
+            }
+            
+            if (!newPin || !confirmNewPin) {
+                showNotification('Please enter and confirm the new PIN', 'error');
+                return;
+            }
+            
+            if (newPin !== confirmNewPin) {
+                showNotification('PINs do not match', 'error');
+                return;
+            }
+            
+            if (newPin.length !== 4 || !/^\d+$/.test(newPin)) {
+                showNotification('PIN must be exactly 4 digits', 'error');
+                return;
+            }
+            
+            const user = users[username];
+            user.pin = newPin;
+            user.locked = false;
+            user.login_attempts = 0;
+            saveUsers();
+            
+            showNotification(`Password for ${username} has been reset.`);
+            document.getElementById('resetUsername').value = '';
+            document.getElementById('adminNewPin').value = '';
+            document.getElementById('adminConfirmNewPin').value = '';
+        }
+        
+        function adminDeleteUser() {
+            const username = document.getElementById('deleteUsername').value;
+            
+            if (!username) {
+                showNotification('Please enter a username', 'error');
+                return;
+            }
+            
+            if (!users[username]) {
+                showNotification('User not found', 'error');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to delete ${username}'s account? This cannot be undone.`)) {
+                return;
+            }
+            
+            delete users[username];
+            saveUsers();
+            
+            showNotification(`Account ${username} has been deleted.`);
+            document.getElementById('deleteUsername').value = '';
+        }
+        
+        function loadAdminStats() {
+            const statsContainer = document.getElementById('adminStatsContainer');
+            
+            const totalUsers = Object.keys(users).length;
+            const activeUsers = Object.values(users).filter(user => !user.locked).length;
+            const lockedUsers = totalUsers - activeUsers;
+            const totalBalance = Object.values(users).reduce((sum, user) => sum + user.balance, 0);
+            const totalLoans = Object.values(users).reduce((sum, user) => sum + user.loan_balance, 0);
+            const premiumUsers = Object.values(users).filter(user => user.is_premium).length;
+            
+            let avgBalance = 0;
+            let richestUser = null;
+            let poorestUser = null;
+            let mostActiveUser = null;
+            
+            if (totalUsers > 0) {
+                avgBalance = totalBalance / totalUsers;
+                richestUser = Object.values(users).reduce((max, user) => user.balance > max.balance ? user : max, users[Object.keys(users)[0]]);
+                poorestUser = Object.values(users).reduce((min, user) => user.balance < min.balance ? user : min, users[Object.keys(users)[0]]);
+                mostActiveUser = Object.values(users).reduce((max, user) => user.transaction_history.length > max.transaction_history.length ? user : max, users[Object.keys(users)[0]]);
+            }
+            
+            statsContainer.innerHTML = `
+                <div class="account-info">
+                    <div class="info-item">
+                        <span>Total Users:</span>
+                        <span>${totalUsers}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Active Users:</span>
+                        <span>${activeUsers}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Locked Users:</span>
+                        <span>${lockedUsers}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Premium Users:</span>
+                        <span>${premiumUsers}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Total Balance in System:</span>
+                        <span>$${totalBalance.toFixed(2)}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Total Outstanding Loans:</span>
+                        <span>$${totalLoans.toFixed(2)}</span>
+                    </div>
+                    ${totalUsers > 0 ? `
+                        <div class="info-item">
+                            <span>Average Balance per User:</span>
+                            <span>$${avgBalance.toFixed(2)}</span>
+                        </div>
+                        <div class="info-item">
+                            <span>Richest User:</span>
+                            <span>${richestUser.username} ($${richestUser.balance.toFixed(2)})</span>
+                        </div>
+                        <div class="info-item">
+                            <span>Poorest User:</span>
+                            <span>${poorestUser.username} ($${poorestUser.balance.toFixed(2)})</span>
+                        </div>
+                        <div class="info-item">
+                            <span>Most Active User:</span>
+                            <span>${mostActiveUser.username} (${mostActiveUser.transaction_history.length} transactions)</span>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        function applyInterest() {
+            const interestRate = 0.02; // 2% annual interest
+            const currentDate = new Date().toISOString().split('T')[0];
+            const lastDate = new Date(lastInterestDate);
+            const currentDt = new Date(currentDate);
+            
+            // Check if a month has passed since last interest calculation
+            const daysDiff = (currentDt - lastDate) / (1000 * 60 * 60 * 24);
+            
+            if (daysDiff >= 30) {
+                Object.values(users).forEach(user => {
+                    if (user.balance > 0) {
+                        const interest = user.balance * (interestRate / 12);
+                        user.balance += interest;
+                        
+                        user.transaction_history.push({
+                            type: "interest",
+                            amount: interest,
+                            balance_after: user.balance,
+                            timestamp: new Date().toISOString()
+                        });
+                    }
+                });
+                
+                lastInterestDate = currentDate;
+                saveUsers();
+                
+                showNotification('Interest applied successfully to all accounts.');
+                document.getElementById('lastInterestDate').textContent = lastInterestDate;
+            } else {
+                showNotification(`Interest was last applied ${Math.floor(daysDiff)} days ago. Need to wait ${Math.ceil(30 - daysDiff)} more days.`, 'error');
+            }
+        }
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            showScreen('mainMenuScreen');
+            
+            // Set up back button
+            document.getElementById('backButton').addEventListener('click', function() {
+                if (currentUser) {
+                    showScreen('userDashboardScreen');
+                } else if (window.location.hash === '#admin') {
+                    showScreen('adminDashboardScreen');
+                } else {
+                    showScreen('mainMenuScreen');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
